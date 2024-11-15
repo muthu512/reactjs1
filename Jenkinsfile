@@ -2,15 +2,15 @@ pipeline {
     agent any
 
     environment {
-        PROJECT_DIR = "C:\\Users\\Dell-Lap\\Downloads\\react-hello-world-master\\react-hello-world-master"
+        PROJECT_DIR = "C:\\Users\\Dell-Lap\\Downloads\\login360ui"
         TOMCAT_DIR = "C:\\Program Files\\Apache Software Foundation\\Tomcat 9.0\\webapps"
-        APP_NAME = "hello"
+        APP_NAME = "login"
     }
 
     stages {
         stage('Checkout SCM') {
             steps {
-                git credentialsId: 'muthu512', url: 'https://github.com/muthu512/reactjs1.git', branch: 'master'
+                git credentialsId: 'muthu512', url: 'https://github.com/muthu512/update_tomcat.git', branch: 'master'
             }
         }
 
@@ -55,11 +55,8 @@ pipeline {
             steps {
                 script {
                     dir(PROJECT_DIR) {
-                        bat 'npm run build'
-                        
-                        // Check if the build directory exists and list its contents
-                        bat 'if exist build (echo Build directory exists) else (echo Build directory does not exist && exit 1)'
-                        bat "dir ${PROJECT_DIR}\\build"
+                        // Set NODE_OPTIONS to use legacy OpenSSL provider for the build
+                        bat 'set NODE_OPTIONS=--openssl-legacy-provider && npm run build'
                     }
                 }
             }
