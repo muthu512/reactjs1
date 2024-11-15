@@ -17,8 +17,8 @@ pipeline {
         stage('Check Node and npm Versions') {
             steps {
                 script {
-                    bat 'node -v || exit 1'
-                    bat 'npm -v || exit 1'
+                    bat 'node -v'
+                    bat 'npm -v'
                 }
             }
         }
@@ -55,17 +55,11 @@ pipeline {
             steps {
                 script {
                     dir(PROJECT_DIR) {
-                        try {
-                            // Run the build command
-                            bat 'npm run build || exit 1'
-                            
-                            // Check if the build directory exists and list its contents
-                            bat 'if exist build (echo Build directory exists) else (echo Build directory does not exist && exit 1)'
-                            bat "dir ${PROJECT_DIR}\\build"  // This will show the contents of the build directory
-                        } catch (Exception e) {
-                            echo "Build failed: ${e.message}"
-                            currentBuild.result = 'FAILED'
-                        }
+                        bat 'npm run build'
+                        
+                        // Check if the build directory exists and list its contents
+                        bat 'if exist build (echo Build directory exists) else (echo Build directory does not exist && exit 1)'
+                        bat "dir ${PROJECT_DIR}\\build"
                     }
                 }
             }
@@ -87,10 +81,8 @@ pipeline {
                     bat "dir \"${TOMCAT_DIR}\\${APP_NAME}\""
                     
                     // Clear Tomcat cache
-                    bat "rmdir /S /Q \"C:\\Program Files\\Apache Software Foundation\\Tomcat 9.0\\work\""
-                    
-                    // Restart Tomcat to apply changes
                     bat "net stop Tomcat9"
+                    bat "rmdir /S /Q \"C:\\Program Files\\Apache Software Foundation\\Tomcat 9.0\\work\""
                     bat "net start Tomcat9"
                 }
             }
