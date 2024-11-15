@@ -8,17 +8,27 @@ pipeline {
     }
 
     stages {
+        stage('Clean Workspace') {
+            steps {
+                cleanWs() // Cleans up the workspace
+            }
+        }
+
         stage('Checkout SCM') {
             steps {
-                git credentialsId: 'muthu512', url: 'https://github.com/muthu512/reactjs1', branch: 'master'
+                script {
+                    git credentialsId: 'muthu512', url: 'https://github.com/muthu512/reactjs1', branch: 'master'
+                    bat 'git fetch --all && git reset --hard origin/master'
+                    bat 'git log -1' // Log the latest commit hash
+                }
             }
         }
 
         stage('Check Node and npm Versions') {
             steps {
                 script {
-                    bat 'node -v'
-                    bat 'npm -v'
+                    bat 'node -v || exit 1'
+                    bat 'npm -v || exit 1'
                 }
             }
         }
@@ -55,22 +65,38 @@ pipeline {
             steps {
                 script {
                     dir(PROJECT_DIR) {
-                        // Set NODE_OPTIONS to use legacy OpenSSL provider for the build
-                        bat 'set NODE_OPTIONS=--openssl-legacy-provider && npm run build'
+                        // Build the React app
+                        bat 'set NODE_OPTIONS=--openssl-legacy-provider && npm run build || exit 1'
+
+                        // Validate build directory
+                        bat "if exist build (echo Build directory exists) else (echo Build directory does not exist && exit 1)"
+                        bat "dir \"${PROJECT_DIR}\\build\"" // Log build directory content
                     }
                 }
             }
         }
 
-        stage('Deploy to Tomcat') { // Fixed typo here
+        stage('Deploy to Tomcat') {
             steps {
                 script {
+                    // Ensure build directory exists
                     bat "if not exist \"${PROJECT_DIR}\\build\" (echo Build directory does not exist && exit 1)"
-                    bat "dir \"${PROJECT_DIR}\\build\""
                     bat "if not exist \"${PROJECT_DIR}\\build\\*\" (echo No files in build directory && exit 1)"
-                    bat "if not exist \"${TOMCAT_DIR}\\${APP_NAME}\" mkdir \"${TOMCAT_DIR}\\${APP_NAME}\""
+
+                    // Remove existing app from Tomcat
+                    bat "rmdir /S /Q \"${TOMCAT_DIR}\\${APP_NAME}\""
+
+                    // Deploy new app files
+                    bat "mkdir \"${TOMCAT_DIR}\\${APP_NAME}\""
                     bat "xcopy /S /I /Y \"${PROJECT_DIR}\\build\\*\" \"${TOMCAT_DIR}\\${APP_NAME}\\\""
+
+                    // Log deployed files
                     bat "dir \"${TOMCAT_DIR}\\${APP_NAME}\""
+
+                    // Clear Tomcat cache and restart
+                    bat "rmdir /S /Q \"C:\\Program Files\\Apache Software Foundation\\Tomcat 9.0\\work\""
+                    bat "net stop Tomcat9"
+                    bat "net start Tomcat9"
                 }
             }
         }
