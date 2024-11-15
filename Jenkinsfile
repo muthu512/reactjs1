@@ -77,33 +77,30 @@ pipeline {
         }
 
         stage('Deploy to Tomcat') {
-    steps {
-        script {
-            // Check if the build directory exists
-            bat """
-            if not exist "${env.PROJECT_DIR}\\build" (
-                echo Build directory does not exist && exit 1
-            )
-            if not exist "${env.PROJECT_DIR}\\build\\*" (
-                echo No files in build directory && exit 1
-            )
-            """
+            steps {
+                script {
+                    // Check if the build directory exists
+                    bat """
+                    if not exist "${env.PROJECT_DIR}\\build" (
+                        echo Build directory does not exist && exit 1
+                    )
+                    if not exist "${env.PROJECT_DIR}\\build\\*" (
+                        echo No files in build directory && exit 1
+                    )
+                    """
 
-            // Check and remove the old deployment directory
-            bat """
-            if exist "${env.TOMCAT_DIR}\\${env.APP_NAME}" (
-                rmdir /S /Q "${env.TOMCAT_DIR}\\${env.APP_NAME}"
-            )
-            """
+                    // Check and remove the old deployment directory
+                    bat """
+                    if exist "${env.TOMCAT_DIR}\\${env.APP_NAME}" (
+                        rmdir /S /Q "${env.TOMCAT_DIR}\\${env.APP_NAME}"
+                    )
+                    """
 
-            // Copy new build to Tomcat
-            bat """
-            xcopy /E /I /Y "${env.PROJECT_DIR}\\build" "${env.TOMCAT_DIR}\\${env.APP_NAME}"
-            """
-        }
-    }
-}
-
+                    // Copy new build to Tomcat
+                    bat """
+                    xcopy /E /I /Y "${env.PROJECT_DIR}\\build" "${env.TOMCAT_DIR}\\${env.APP_NAME}"
+                    """
+                }
             }
         }
     }
