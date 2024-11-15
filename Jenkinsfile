@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        PROJECT_DIR = "C:\\Users\\Dell-Lap\\Downloads\\login360ui"
+        PROJECT_DIR = "C:\\Users\\Dell-Lap\\Downloads\\react-hello-world-master\\react-hello-world-master"
         TOMCAT_DIR = "C:\\Program Files\\Apache Software Foundation\\Tomcat 9.0\\webapps"
         APP_NAME = "login"
     }
@@ -10,7 +10,7 @@ pipeline {
     stages {
         stage('Checkout SCM') {
             steps {
-                git credentialsId: 'muthu512', url: 'https://github.com/muthu512/update_tomcat.git', branch: 'master'
+                git credentialsId: 'muthu512', url: 'https://github.com/muthu512/reactjs1', branch: 'master'
             }
         }
 
