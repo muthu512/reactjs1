@@ -77,27 +77,33 @@ pipeline {
         }
 
         stage('Deploy to Tomcat') {
-            steps {
-                script {
-                    // Ensure build directory exists
-                    bat "if not exist \"${PROJECT_DIR}\\build\" (echo Build directory does not exist && exit 1)"
-                    bat "if not exist \"${PROJECT_DIR}\\build\\*\" (echo No files in build directory && exit 1)"
+    steps {
+        script {
+            // Check if the build directory exists
+            bat """
+            if not exist "${env.PROJECT_DIR}\\build" (
+                echo Build directory does not exist && exit 1
+            )
+            if not exist "${env.PROJECT_DIR}\\build\\*" (
+                echo No files in build directory && exit 1
+            )
+            """
 
-                    // Remove existing app from Tomcat
-                    bat "rmdir /S /Q \"${TOMCAT_DIR}\\${APP_NAME}\""
+            // Check and remove the old deployment directory
+            bat """
+            if exist "${env.TOMCAT_DIR}\\${env.APP_NAME}" (
+                rmdir /S /Q "${env.TOMCAT_DIR}\\${env.APP_NAME}"
+            )
+            """
 
-                    // Deploy new app files
-                    bat "mkdir \"${TOMCAT_DIR}\\${APP_NAME}\""
-                    bat "xcopy /S /I /Y \"${PROJECT_DIR}\\build\\*\" \"${TOMCAT_DIR}\\${APP_NAME}\\\""
+            // Copy new build to Tomcat
+            bat """
+            xcopy /E /I /Y "${env.PROJECT_DIR}\\build" "${env.TOMCAT_DIR}\\${env.APP_NAME}"
+            """
+        }
+    }
+}
 
-                    // Log deployed files
-                    bat "dir \"${TOMCAT_DIR}\\${APP_NAME}\""
-
-                    // Clear Tomcat cache and restart
-                    bat "rmdir /S /Q \"C:\\Program Files\\Apache Software Foundation\\Tomcat 9.0\\work\""
-                    bat "net stop Tomcat9"
-                    bat "net start Tomcat9"
-                }
             }
         }
     }
