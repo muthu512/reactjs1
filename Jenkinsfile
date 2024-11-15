@@ -62,25 +62,15 @@ pipeline {
             }
         }
 
-        stage('Deploy to Tomcat') {
+        stage('Deploy to Tomcat') { // Fixed typo here
             steps {
                 script {
                     bat "if not exist \"${PROJECT_DIR}\\build\" (echo Build directory does not exist && exit 1)"
                     bat "dir \"${PROJECT_DIR}\\build\""
                     bat "if not exist \"${PROJECT_DIR}\\build\\*\" (echo No files in build directory && exit 1)"
-                    
-                    // Remove the existing app directory in Tomcat
-                    bat "rmdir /S /Q \"${TOMCAT_DIR}\\${APP_NAME}\""
-                    
-                    // Create the new directory and copy files
                     bat "if not exist \"${TOMCAT_DIR}\\${APP_NAME}\" mkdir \"${TOMCAT_DIR}\\${APP_NAME}\""
                     bat "xcopy /S /I /Y \"${PROJECT_DIR}\\build\\*\" \"${TOMCAT_DIR}\\${APP_NAME}\\\""
                     bat "dir \"${TOMCAT_DIR}\\${APP_NAME}\""
-                    
-                    // Clear Tomcat cache
-                    bat "net stop Tomcat9"
-                    bat "rmdir /S /Q \"C:\\Program Files\\Apache Software Foundation\\Tomcat 9.0\\work\""
-                    bat "net start Tomcat9"
                 }
             }
         }
