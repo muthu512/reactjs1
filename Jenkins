@@ -10,7 +10,7 @@ pipeline {
     stages {
         stage('Checkout SCM') {
             steps {
-                git credentialsId: 'muthu512', url: 'https://github.com/muthu512/update_tomcat.git', branch: 'master'
+                git credentialsId: 'muthu512', url: 'https://github.com/muthu512/reactjs1.git', branch: 'master'
             }
         }
 
